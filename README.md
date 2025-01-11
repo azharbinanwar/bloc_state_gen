@@ -1,39 +1,100 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# bloc_state_gen
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A Dart package that generates extension methods for Bloc states to enhance their functionality with pattern matching and logging capabilities.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- Generate `when` methods for exhaustive state handling
+- Generate `maybeWhen` methods for optional state handling
+- Generate `log` methods for debugging state changes
+- Type-safe state pattern matching
+- Support for states with parameters
 
-## Getting started
+## Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add the following to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  bloc_state_gen: ^1.0.0
+
+dev_dependencies:
+  build_runner: ^2.4.0
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+1. Annotate your state class with `@BlocStateGen`:
 
 ```dart
-const like = 'sample';
+import 'package:bloc_state_gen/bloc_state_gen.dart';
+
+@BlocStateGen()
+abstract class CounterState {}
+
+class CounterInitial extends CounterState {}
+
+class CounterLoading extends CounterState {}
+
+class CounterLoaded extends CounterState {
+  final int value;
+  CounterLoaded(this.value);
+}
+
+class CounterError extends CounterState {
+  final String message;
+  CounterError(this.message);
+}
 ```
 
-## Additional information
+2. Run the build_runner:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```bash
+dart run build_runner build
+```
+
+3. Use the generated extensions:
+
+```dart
+void handleState(CounterState state) {
+  state.when(
+    counterInitial: () => Text('Initial'),
+    counterLoading: () => CircularProgressIndicator(),
+    counterLoaded: (value) => Text('Count: $value'),
+    counterError: (message) => Text('Error: $message'),
+  );
+}
+
+// Or use maybeWhen for partial matching
+void handleStatePartially(CounterState state) {
+  state.maybeWhen(
+    counterLoaded: (value) => print('Count: $value'),
+    orElse: () => print('Other state'),
+  );
+}
+
+// Debug state changes
+void debugState(CounterState state) {
+  state.log(); // Prints state type and fields
+}
+```
+
+## Configuration
+
+You can customize the generated code by configuring the annotation:
+
+```dart
+@BlocStateGen(
+  when: true,      // Generate when method
+  maybeWhen: true, // Generate maybeWhen method
+  log: true,       // Generate log method
+)
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -1,15 +1,13 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:state_extension/src/annotations.dart';
+import 'package:bloc_state_gen/src/annotations.dart';
 
-class StateExtensionGenerator extends GeneratorForAnnotation<EnhanceState> {
+class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
   @override
-  String generateForAnnotatedElement(
-    Element element,
-    ConstantReader annotation,
-    BuildStep buildStep,
-  ) {
+  String generateForAnnotatedElement(Element element,
+      ConstantReader annotation,
+      BuildStep buildStep,) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'EnhanceState can only be applied to classes.',
@@ -21,25 +19,35 @@ class StateExtensionGenerator extends GeneratorForAnnotation<EnhanceState> {
     final subclasses = _getSubclasses(element);
     final buffer = StringBuffer();
 
+    // Get annotation configurations
+    final generateWhen = annotation.read('when').boolValue;
+    final generateMaybeWhen = annotation.read('maybeWhen').boolValue;
+    final generateLog = annotation.read('log').boolValue;
+
     // Generate extension
     buffer.writeln('\nextension ${className}Extension on $className {');
 
-    // Generate when method
-    _generateWhenMethod(buffer, className, subclasses);
+    // Generate methods based on configuration
+    if (generateWhen) {
+      _generateWhenMethod(buffer, className, subclasses);
+    }
 
-    // Generate maybeWhen method
-    _generateMaybeWhenMethod(buffer, className, subclasses);
+    if (generateMaybeWhen) {
+      _generateMaybeWhenMethod(buffer, className, subclasses);
+    }
+
+    if (generateLog) {
+      _generateLogMethod(buffer, className);
+    }
 
     buffer.writeln('}');
 
     return buffer.toString();
   }
 
-  void _generateWhenMethod(
-    StringBuffer buffer,
-    String className,
-    List<ClassElement> subclasses,
-  ) {
+  void _generateWhenMethod(StringBuffer buffer,
+      String className,
+      List<ClassElement> subclasses) {
     buffer.writeln('  Widget when({');
 
     // Generate required parameters
@@ -77,11 +85,9 @@ class StateExtensionGenerator extends GeneratorForAnnotation<EnhanceState> {
     buffer.writeln('  }');
   }
 
-  void _generateMaybeWhenMethod(
-    StringBuffer buffer,
-    String className,
-    List<ClassElement> subclasses,
-  ) {
+  void _generateMaybeWhenMethod(StringBuffer buffer,
+      String className,
+      List<ClassElement> subclasses) {
     buffer.writeln('  R maybeWhen<R>({');
 
     // Generate optional parameters
@@ -122,24 +128,43 @@ class StateExtensionGenerator extends GeneratorForAnnotation<EnhanceState> {
     buffer.writeln('  }');
   }
 
+  void _generateLogMethod(StringBuffer buffer, String className) {
+    buffer.writeln('''
+  void log() {
+    print('Current State: \${this.runtimeType}');
+    if (this is dynamic) {
+      final dynamic state = this;
+      final fields = state.toString().split(',');
+      if (fields.length > 1) {
+        print('Fields:');
+        for (final field in fields.skip(1)) {
+          print('  \$field');
+        }
+      }
+    }
+  }
+''');
+  }
+
   List<ClassElement> _getSubclasses(ClassElement element) {
-    return element.library.topLevelElements.whereType<ClassElement>().where((e) => e.supertype?.element == element).toList();
+    return element.library.topLevelElements
+        .whereType<ClassElement>()
+        .where((e) => e.supertype?.element == element)
+        .toList();
   }
 
   List<ParameterElement> _getConstructorParameters(ClassElement element) {
-    // Get the unnamed constructor
     final constructor = element.constructors.where((c) => c.name.isEmpty).firstOrNull;
-
     if (constructor == null) return [];
-
-    // Get all constructor parameters
     return constructor.parameters.where((param) => !param.isPrivate).toList();
   }
 
   String _getParameterName(String className) {
-    final name = className.replaceFirst(RegExp(r'^[A-Z][a-z]*'), '').toLowerCase();
-    return name.isEmpty ? 'initial' : name;
+    // Convert to camelCase
+    final firstChar = className[0].toLowerCase();
+    return firstChar + className.substring(1);
   }
 }
 
-Builder stateExtensionBuilder(BuilderOptions options) => SharedPartBuilder([StateExtensionGenerator()], 'state_extension');
+Builder stateExtensionBuilder(BuilderOptions options) =>
+    SharedPartBuilder([StateExtensionGenerator()], 'state_extension');

@@ -1,6 +1,6 @@
 builders:
-  state_extension:
-    import: "package:state_extension/builder.dart"
+  bloc_state_gen:
+    import: "package:bloc_state_gen/builder.dart"
     builder_factories: ["stateExtension"]
     build_extensions: {".dart": [".g.part"]}
     auto_apply: dependents
