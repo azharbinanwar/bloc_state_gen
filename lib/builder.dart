@@ -1,4 +1,45 @@
-import 'package:build/build.dart';
 import 'package:bloc_state_gen/src/generator.dart';
+import 'package:build/build.dart';
+import 'package:source_gen/source_gen.dart';
 
-Builder stateExtension(BuilderOptions options) => stateExtensionBuilder(options);
+/// A custom builder for generating Bloc state extensions.
+///
+/// This builder processes files ending with '_cubit.dart' or '_bloc.dart'
+/// and generates corresponding state extension files.
+class CustomStateBuilder implements Builder {
+  /// Defines the input and output file extensions for the builder.
+  ///
+  /// Processes files ending with '_cubit.dart' or '_bloc.dart' and
+  /// generates '_state.g.dart' files.
+  @override
+  final buildExtensions = const {
+    '_cubit.dart': ['_state.g.dart'],
+    '_bloc.dart': ['_state.g.dart']
+  };
+
+  /// Builds the state extensions for the given [buildStep].
+  ///
+  /// Uses [SharedPartBuilder] internally to generate the extensions.
+  /// The generated code includes pattern matching and logging utilities.
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    final sharedBuilder = SharedPartBuilder(
+      [StateExtensionGenerator()],
+      'bloc_state_gen',
+    );
+
+    await sharedBuilder.build(buildStep);
+  }
+}
+
+/// Creates a [Builder] for generating Bloc state extensions.
+///
+/// Usage in build.yaml:
+/// ```yaml
+/// targets:
+///   $default:
+///     builders:
+///       bloc_state_gen:
+///         enabled: true
+/// ```
+Builder blocStateGenBuilder(BuilderOptions options) => CustomStateBuilder();
