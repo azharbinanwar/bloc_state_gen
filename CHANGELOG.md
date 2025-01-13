@@ -1,3 +1,6 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release
+* Support for generating state extensions
+* Match pattern support
+* Logging utilities
