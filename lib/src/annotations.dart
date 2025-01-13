@@ -3,17 +3,17 @@ import 'package:meta/meta.dart';
 @immutable
 class BlocStateGen {
   /// Whether to generate the when method
-  final bool when;
+  final bool match;
 
   /// Whether to generate the maybeWhen method
-  final bool maybeWhen;
+  final bool matchSome;
 
   /// Whether to generate the log method
   final bool log;
 
   const BlocStateGen({
-    this.when = true,
-    this.maybeWhen = true,
+    this.match = true,
+    this.matchSome = true,
     this.log = true,
   });
 }

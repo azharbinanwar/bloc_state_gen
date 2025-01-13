@@ -1,13 +1,15 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:bloc_state_gen/src/annotations.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:bloc_state_gen/src/annotations.dart';
 
 class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
   @override
-  String generateForAnnotatedElement(Element element,
-      ConstantReader annotation,
-      BuildStep buildStep,) {
+  String generateForAnnotatedElement(
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'EnhanceState can only be applied to classes.',
@@ -20,20 +22,20 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
     final buffer = StringBuffer();
 
     // Get annotation configurations
-    final generateWhen = annotation.read('when').boolValue;
-    final generateMaybeWhen = annotation.read('maybeWhen').boolValue;
+    final generateMatch = annotation.read('match').boolValue;
+    final generateMatchSome = annotation.read('matchSome').boolValue;
     final generateLog = annotation.read('log').boolValue;
 
     // Generate extension
     buffer.writeln('\nextension ${className}Extension on $className {');
 
     // Generate methods based on configuration
-    if (generateWhen) {
-      _generateWhenMethod(buffer, className, subclasses);
+    if (generateMatch) {
+      _generateMatchMethod(buffer, className, subclasses);
     }
 
-    if (generateMaybeWhen) {
-      _generateMaybeWhenMethod(buffer, className, subclasses);
+    if (generateMatchSome) {
+      _generateMatchSomeMethod(buffer, className, subclasses);
     }
 
     if (generateLog) {
@@ -45,10 +47,8 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
     return buffer.toString();
   }
 
-  void _generateWhenMethod(StringBuffer buffer,
-      String className,
-      List<ClassElement> subclasses) {
-    buffer.writeln('  Widget when({');
+  void _generateMatchMethod(StringBuffer buffer, String className, List<ClassElement> subclasses) {
+    buffer.writeln('  Widget match({');
 
     // Generate required parameters
     for (final subclass in subclasses) {
@@ -85,10 +85,8 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
     buffer.writeln('  }');
   }
 
-  void _generateMaybeWhenMethod(StringBuffer buffer,
-      String className,
-      List<ClassElement> subclasses) {
-    buffer.writeln('  R maybeWhen<R>({');
+  void _generateMatchSomeMethod(StringBuffer buffer, String className, List<ClassElement> subclasses) {
+    buffer.writeln('  R matchSome<R>({');
 
     // Generate optional parameters
     for (final subclass in subclasses) {
@@ -130,27 +128,23 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
 
   void _generateLogMethod(StringBuffer buffer, String className) {
     buffer.writeln('''
-  void log() {
-    print('Current State: \${this.runtimeType}');
-    if (this is dynamic) {
-      final dynamic state = this;
-      final fields = state.toString().split(',');
-      if (fields.length > 1) {
-        print('Fields:');
-        for (final field in fields.skip(1)) {
-          print('  \$field');
-        }
-      }
-    }
+  void log({bool showTime = false, void Function(Object state)? onChanged}) {
+    /// Use the provided logger or default to print
+    onChanged ??= print;
+
+    /// Prepare the log message
+    final logMessage = showTime
+        ? '[\${DateTime.now().toIso8601String()}] Current State: \$runtimeType'
+        : '\$runtimeType';
+
+    // Invoke the logger
+    onChanged(logMessage);
   }
 ''');
   }
 
   List<ClassElement> _getSubclasses(ClassElement element) {
-    return element.library.topLevelElements
-        .whereType<ClassElement>()
-        .where((e) => e.supertype?.element == element)
-        .toList();
+    return element.library.topLevelElements.whereType<ClassElement>().where((e) => e.supertype?.element == element).toList();
   }
 
   List<ParameterElement> _getConstructorParameters(ClassElement element) {
@@ -166,5 +160,4 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
   }
 }
 
-Builder stateExtensionBuilder(BuilderOptions options) =>
-    SharedPartBuilder([StateExtensionGenerator()], 'state_extension');
+Builder stateExtensionBuilder(BuilderOptions options) => SharedPartBuilder([StateExtensionGenerator()], 'state_extension');
