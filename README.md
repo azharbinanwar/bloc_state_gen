@@ -1,5 +1,11 @@
 # bloc_state_gen
 
+
+
+https://github.com/user-attachments/assets/97d02d6d-98af-415f-8538-ef432f4c2ed1
+
+
+
 A lightweight Dart package that generates convenient extensions for BLoC state classes, offering pattern matching and logging capabilities through simple annotations.
 
 ## Features
@@ -193,15 +199,11 @@ if (kDebugMode) {
 
 ## Example Project
 
-For a complete working example, check out our [example project](link_to_example) demonstrating:
+For a complete working example, check out our [example project](https://github.com/azharbinanwar/bloc_state_gen/tree/master/example) demonstrating:
 - State class definition
 - Extension generation
 - Usage of all three core features
 - Integration with Flutter UI
-
-## Contributing
-
-Contributions are welcome! Please see our [contributing guide](CONTRIBUTING.md) for details.
 
 ## License
 
