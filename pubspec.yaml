@@ -1,6 +1,6 @@
 name: bloc_state_gen
 description: "A package to generate helper extensions for Bloc state management, like when and maybeWhen."
-version: 0.1.0
+version: 0.1.0+1
 homepage: https://github.com/azharbinanwar/bloc_state_gen # Replace with your repository or homepage URL
 
 environment:
