@@ -1,3 +1,9 @@
+#### 0.1.1+3
+- **Documentation Updates**:
+  - Fixed dead example link in the `README.md`.
+  - Removed the contribution guide section from the `README.md`.
+  - Added a video example to the `README.md` for better understanding.
+
 #### 0.1.0+2
 - **Update** `_getParameterName` function:
     - Converts a class name to a parameter name in camelCase.
