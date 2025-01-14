@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_state_gen/bloc_state_gen.dart';
 
@@ -18,7 +17,6 @@ class SearchCubit extends Cubit<SearchState> {
     // Start searching
     emit(Searching(
       query: query,
-      filters: filters ?? {},
     ));
 
     try {
@@ -32,26 +30,23 @@ class SearchCubit extends Cubit<SearchState> {
 
       final results = List.generate(
         query.length + 5,
-            (i) => 'Result ${i + 1} for "$query"',
+        (i) => 'Result ${i + 1} for "$query"',
       );
 
       if (results.isEmpty) {
         emit(NoResults(
           query: query,
-          filters: filters ?? {},
         ));
       } else {
         emit(SearchResults(
           query: query,
           results: results,
-          filters: filters ?? {},
         ));
       }
     } catch (e) {
       emit(SearchError(
         message: e.toString(),
         query: query,
-        filters: filters,
       ));
     }
   }

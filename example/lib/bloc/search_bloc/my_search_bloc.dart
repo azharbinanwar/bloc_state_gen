@@ -16,7 +16,8 @@ class MySearchBloc extends Bloc<MySearchEvent, MySearchState> {
     on<SearchCleared>(_searchCleared);
   }
 
-  Future<void> _searchStarted(SearchStarted event, Emitter<MySearchState> emit) async {
+  Future<void> _searchStarted(
+      SearchStarted event, Emitter<MySearchState> emit) async {
     // Reset if empty query
     if (event.query.trim().isEmpty) {
       emit(const MySearchInitial());
@@ -59,10 +60,10 @@ class MySearchBloc extends Bloc<MySearchEvent, MySearchState> {
       emit(MySearchError(
         message: e.toString(),
         query: event.query,
-        filters: event.filters,
       ));
     }
   }
 
-  void _searchCleared(SearchCleared event, Emitter<MySearchState> emit) => emit(const MySearchInitial());
+  void _searchCleared(SearchCleared event, Emitter<MySearchState> emit) =>
+      emit(const MySearchInitial());
 }

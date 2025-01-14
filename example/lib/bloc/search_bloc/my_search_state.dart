@@ -53,4 +53,3 @@ class MySearchError extends MySearchState {
     this.filters,
   });
 }
-

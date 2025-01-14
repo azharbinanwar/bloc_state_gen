@@ -1,372 +1,208 @@
 # bloc_state_gen
 
-The `bloc_state_gen` package helps generate extensions for BLoC state classes, making it easier to manage state-specific actions such as UI rendering or state transitions.
-
-This example illustrates:
-- Defining state classes and annotating them with `@BlocStateGen`.
-- Using the generated extensions in your Flutter app.
-
-
-### Getting Started with `bloc_state_gen`
-
-This guide will help you set up and use the `bloc_state_gen` package for state management in your Flutter application. It also includes instructions on ignoring generated files like `*.g.dart` to maintain a clean repository.
-
-### Step 1: Add Dependencies
-
-Update your `pubspec.yaml` file to include the necessary dependencies:
-
-```yaml
-dependencies:
-  bloc_state_gen: ^1.0.0 # Add your generator dependency
-
-dev_dependencies:
-  build_runner: 
-```
-
-### Step 2: Create a `.gitignore` File
-
-To prevent generated files from being tracked by version control, add the following entry to your `.gitignore` file:
-
-```gitignore
-# Ignore generated files
-*.g.dart
-
-# Other ignored files...
-```
-
-### Step 3: Generate Files
-
-Run the following command to generate the `*.g.dart` files required by the `bloc_state_gen` package:
-
-```bash
-dart run build_runner build
-```
-
-## How to Run
-
-1. Clone this repository.
-2. Ensure you have Flutter installed on your system.
-3. Run `flutter pub get` to install dependencies.
-4. Run the app using `flutter run`.
+A lightweight Dart package that generates convenient extensions for BLoC state classes, offering pattern matching and logging capabilities through simple annotations.
 
 ## Features
 
-- **State Management**: Clean and scalable state management using BLoC.
-- **Generated Extensions**: Simplified state handling through generated extensions.
-- **Example Usage**: A complete example demonstrating search functionality.
+### 🎯 Pattern Matching
+- **match**: Complete state pattern matching requiring all cases to be handled
+- **matchSome**: Partial pattern matching with default case handling
+- Compile-time type safety
 
-## Generated Extensions
+### 📝 Logging
+- Built-in state logging functionality
+- Debug-friendly state information
 
-The `bloc_state_gen` package generates utility extensions for your state classes. Here's an example:
+## Installation
+
+1. Add `bloc_state_gen` to your `pubspec.yaml`:
+
+   ```yaml
+   dependencies:
+     bloc_state_gen: ^latest_version
+
+   dev_dependencies:
+     build_runner: ^latest_version
+   ```
+
+2. Update your main cubit class to include the generated file:
+
+   ```dart
+   import 'package:flutter_bloc/flutter_bloc.dart';
+   import 'package:bloc_state_gen/bloc_state_gen.dart';
+
+   part 'search_state.dart';
+   part 'search_state.g.dart';
+
+   class SearchCubit extends Cubit<SearchState> {
+     SearchCubit() : super(const SearchInitial());
+   }
+   ```
+
+3. Run the code generator:
+
+   ```bash
+   flutter pub run build_runner build
+   ```
+
+4. Ignore generated `.g.dart` files in version control by adding the following to your `.gitignore`:
+
+   ```gitignore
+   # Ignore generated files
+   *.g.dart
+   ```
+
+## Usage
+
+### Basic Setup
+
+1. Annotate your state class with `@BlocStateGen`:
+
+   ```dart
+   part of 'search_cubit.dart';
+
+   @BlocStateGen()
+   abstract class SearchState {
+     const SearchState();
+   }
+
+   class SearchInitial extends SearchState {
+     const SearchInitial();
+   }
+
+   class Searching extends SearchState {
+     final String query;
+
+     const Searching({
+       required this.query,
+     });
+   }
+
+   class SearchResults extends SearchState {
+     final String query;
+     final List<String> results;
+
+     const SearchResults({
+       required this.query,
+       required this.results,
+     });
+   }
+
+   class NoResults extends SearchState {
+     final String query;
+
+     const NoResults({
+       required this.query,
+     });
+   }
+
+   class SearchError extends SearchState {
+     final String message;
+     final String? query;
+
+     const SearchError({
+       required this.message,
+       this.query,
+     });
+   }
+   ```
+
+2. Run the code generator:
+
+   ```bash
+   flutter pub run build_runner build
+   ```
+
+### Feature Usage
+
+#### 1. match - Complete Pattern Matching
+
+Requires handling all possible states:
 
 ```dart
-extension SearchStateExtension on SearchState {
-  T match<T>({
-    required T Function() searchInitial,
-    required T Function(String query, Map<String, dynamic> filters) searching,
-    required T Function(String query, List<String> results, Map<String, dynamic> filters) searchResults,
-    required T Function(String query, Map<String, dynamic> filters) noResults,
-    required T Function(String message, String? query, Map<String, dynamic>? filters) searchError,
-  }) {
-    // Implementation...
-  }
+Widget buildStateWidget(SearchState state) {
+  return state.match(
+    searchInitial: () => const StartSearch(),
+    searching: (query) => const CircularProgressIndicator(),
+    searchResults: (query, results) => DisplayList(items: results),
+    noResults: (query) => NoResultsWidget(query: query),
+    searchError: (message, query) => ErrorMessage(message: message),
+  );
 }
 ```
 
-## Folder Structure
+#### 2. matchSome - Partial Pattern Matching
 
-```
-lib/
-├── bloc/
-│   ├── search/
-│   │   ├── search_cubit.dart
-│   │   ├── search_state.dart
-├── main.dart
-```
-
-## Annotation Class: `BlocStateGen`
-
-The `BlocStateGen` annotation class is a custom Dart annotation that enables code generation for BLoC state classes. This class allows developers to configure the behavior of the generated extensions.
-
-### Definition
+Handle specific states with a default case:
 
 ```dart
-@const BlocStateGen({
-    this.match = true,
-    this.matchSome = true,
-    this.log = true,
-});
+String getDisplayText(SearchState state) {
+  return state.matchSome(
+    searchResults: (query, results) => 'Found ${results.length} results for: $query',
+    searchError: (message, query) => 'Error${query != null ? " for $query" : ""}: $message',
+    orElse: () => 'Idle...',
+  );
+}
 ```
 
-### Key Properties
+#### 3. log - State Logging
 
-1. **`match`**:
-    - Type: `bool`
-    - Default: `true`
-    - **Purpose**: Indicates whether the code generator should create a `match` method for exhaustive pattern matching. This method is used to handle all possible states of the annotated class, ensuring complete state handling.
-
-2. **`matchSome`**:
-    - Type: `bool`
-    - Default: `true`
-    - **Purpose**: Indicates whether the generator should create a `matchSome` method. This method provides optional pattern matching, allowing developers to handle only specific states while skipping others.
-
-3. **`log`**:
-    - Type: `bool`
-    - Default: `true`
-    - **Purpose**: Determines whether a `log` method should be generated. The `log` method helps in debugging by providing detailed information about the current state, such as its type and associated properties.
-
-### How It Works
-
-- When you annotate a BLoC state class with `@BlocStateGen`, the annotation triggers a code generator to create utility methods based on the configured properties.
-- By default, all methods (`match`, `matchSome`, and `log`) are generated unless explicitly disabled by setting their respective properties to `false`.
-
-### Example Usage
-
-### `search_state.dart`
+Print state information for debugging:
 
 ```dart
-part of 'search_cubit.dart';
+void debugState(CounterState state) {
+  print(state.log());  // Outputs formatted state information
+}
+```
 
-@BlocStateGen()
+### Customizing Generation
+
+You can selectively enable/disable features using the `@BlocStateGen` annotation:
+
+```dart
+@BlocStateGen(
+  match: true,      // Enable complete pattern matching
+  matchSome: true,  // Enable partial pattern matching
+  log: true,        // Enable logging functionality
+)
 abstract class SearchState {
   const SearchState();
 }
-
-class SearchInitial extends SearchState {
-  const SearchInitial();
-}
-
-class Searching extends SearchState {
-  final String query;
-  final Map<String, dynamic> filters;
-
-  const Searching({
-    required this.query,
-    required this.filters,
-  });
-}
-
-class SearchResults extends SearchState {
-  final String query;
-  final List<String> results;
-  final Map<String, dynamic> filters;
-
-  const SearchResults({
-    required this.query,
-    required this.results,
-    required this.filters,
-  });
-}
-
-class NoResults extends SearchState {
-  final String query;
-  final Map<String, dynamic> filters;
-
-  const NoResults({
-    required this.query,
-    required this.filters,
-  });
-}
-
-class SearchError extends SearchState {
-  final String message;
-  final String? query;
-  final Map<String, dynamic>? filters;
-
-  const SearchError({
-    required this.message,
-    this.query,
-    this.filters,
-  });
-}
 ```
 
-### `search_cubit.dart`
+## Best Practices
 
+1. **Complete Pattern Matching**
+   - Use `match` when you need to handle all possible states
+   - Ensures no state is accidentally forgotten
+   - Provides compile-time safety
+
+2. **Partial Pattern Matching**
+   - Use `matchSome` when you only need to handle specific states
+   - Always provide a meaningful `orElse` case
+   - Useful for selective state handling
+
+3. **Logging**
+   - Enable logging during development for better debugging
+   - Use in conjunction with Flutter's debug mode:
 ```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bloc_state_gen/bloc_state_gen.dart';
-
-part 'search_state.dart';
-part 'search_state.g.dart';
-
-class SearchCubit extends Cubit<SearchState> {
-  SearchCubit() : super(const SearchInitial());
-
-  Future<void> search(String query, {Map<String, dynamic>? filters}) async {
-    // Reset if empty query
-    if (query.trim().isEmpty) {
-      emit(const SearchInitial());
-      return;
-    }
-
-    // Start searching
-    emit(Searching(
-      query: query,
-      filters: filters ?? {},
-    ));
-
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Mock search results
-      if (query.toLowerCase().contains('error')) {
-        throw Exception('Search failed');
-      }
-
-      final results = List.generate(
-        query.length + 5,
-            (i) => 'Result ${i + 1} for "$query"',
-      );
-
-      if (results.isEmpty) {
-        emit(NoResults(
-          query: query,
-          filters: filters ?? {},
-        ));
-      } else {
-        emit(SearchResults(
-          query: query,
-          results: results,
-          filters: filters ?? {},
-        ));
-      }
-    } catch (e) {
-      emit(SearchError(
-        message: e.toString(),
-        query: query,
-        filters: filters,
-      ));
-    }
-  }
-
-  void clear() {
-    emit(const SearchInitial());
-  }
+if (kDebugMode) {
+  print(state.log());
 }
 ```
 
-## Example Code: Search Feature
+## Example Project
 
-Below is the full example of implementing a search functionality with `bloc_state_gen`:
+For a complete working example, check out our [example project](link_to_example) demonstrating:
+- State class definition
+- Extension generation
+- Usage of all three core features
+- Integration with Flutter UI
 
-### `main.dart`
+## Contributing
 
-```dart
-import 'package:example/bloc/search/search_cubit.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+Contributions are welcome! Please see our [contributing guide](CONTRIBUTING.md) for details.
 
-void main() {
-  runApp(const MyApp());
-}
+## License
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: SearchPage());
-  }
-}
-
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
-
-  @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  final _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => SearchCubit(),
-      child: Builder(builder: (context) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Search Example'),
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Search...',
-                          border: OutlineInputBorder(),
-                        ),
-                        onSubmitted: (query) {
-                          context.read<SearchCubit>().search(query);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () {
-                        context.read<SearchCubit>().search(_searchController.text);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        context.read<SearchCubit>().clear();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: BlocBuilder<SearchCubit, SearchState>(
-                  builder: (context, state) {
-                    state.log(showTime: true);
-                    state.log(onLog: (state) => print('My state: $state'));
-                    return state.match(
-                      searchInitial: () => const Center(
-                        child: Text('Enter a search term'),
-                      ),
-                      searching: (query, filters) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      searchResults: (query, results, filters) => ListView.builder(
-                        itemCount: results.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(results[index]),
-                          );
-                        },
-                      ),
-                      noResults: (query, filters) => Center(
-                        child: Text('No results found for "$query"'),
-                      ),
-                      searchError: (message, query, filters) => Center(
-                        child: Text('Error: $message'),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-}
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -59,7 +59,8 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
   /// Writes the file header with necessary imports and part declarations.
   void _writeFileHeader(StringBuffer buffer, String fileName) {
     buffer.writeln('// GENERATED CODE - DO NOT MODIFY BY HAND');
-    buffer.writeln('// ignore_for_file: unused_element, deprecated_member_use, unused_local_variable');
+    buffer.writeln(
+        '// ignore_for_file: unused_element, deprecated_member_use, unused_local_variable');
     buffer.writeln();
     buffer.writeln('part of \'$fileName\';');
     buffer.writeln();
@@ -78,7 +79,8 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
       throw InvalidGenerationSourceError(
         'No subclasses found for $className.',
         element: element,
-        todo: 'Create at least one subclass of $className to represent different states',
+        todo:
+            'Create at least one subclass of $className to represent different states',
       );
     }
 
@@ -146,7 +148,8 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
     if (fields.isEmpty) {
       buffer.writeln('      return $paramName();');
     } else {
-      final params = fields.map((f) => '(this as $subclassName).${f.name}').join(', ');
+      final params =
+          fields.map((f) => '(this as $subclassName).${f.name}').join(', ');
       buffer.writeln('      return $paramName($params);');
     }
     buffer.writeln('    }');
@@ -173,7 +176,9 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
 
   /// Gets all subclasses of the annotated class.
   List<ClassElement> _getSubclasses(ClassElement element) {
-    return element.library.topLevelElements.whereType<ClassElement>().where((e) {
+    return element.library.topLevelElements
+        .whereType<ClassElement>()
+        .where((e) {
       final supertype = e.supertype;
       return supertype != null && supertype.element == element;
     }).toList();
@@ -181,8 +186,12 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
 
   /// Gets the constructor parameters for a class.
   List<ParameterElement> _getConstructorParameters(ClassElement element) {
-    final constructor = element.constructors.where((c) => c.name.isEmpty).firstOrNull;
-    return constructor?.parameters.where((param) => !param.isPrivate).toList() ?? [];
+    final constructor =
+        element.constructors.where((c) => c.name.isEmpty).firstOrNull;
+    return constructor?.parameters
+            .where((param) => !param.isPrivate)
+            .toList() ??
+        [];
   }
 
   /// Converts a class name to a parameter name in camelCase.
@@ -266,7 +275,8 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
         buffer.writeln('      return $paramName();');
       } else {
         // For states with parameters, cast and extract fields
-        final params = fields.map((f) => '(this as $subclassName).${f.name}').join(', ');
+        final params =
+            fields.map((f) => '(this as $subclassName).${f.name}').join(', ');
         buffer.writeln('      return $paramName($params);');
       }
 

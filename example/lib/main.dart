@@ -11,7 +11,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: SearchPage());
+    return const MaterialApp(
+      home: SearchPage(),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
 
@@ -62,7 +65,9 @@ class _SearchPageState extends State<SearchPage> {
                     IconButton(
                       icon: const Icon(Icons.search),
                       onPressed: () {
-                        context.read<SearchCubit>().search(_searchController.text);
+                        context
+                            .read<SearchCubit>()
+                            .search(_searchController.text);
                       },
                     ),
                     IconButton(
@@ -76,7 +81,17 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
               Expanded(
-                child: BlocBuilder<SearchCubit, SearchState>(
+                child: BlocConsumer<SearchCubit, SearchState>(
+                  listener: (context, state) {
+                    String result = state.matchSome(
+                      searchResults: (query, results) =>
+                          'Found ${results.length} results for: $query',
+                      searchError: (message, query) =>
+                          'Error${query != null ? " for $query" : ""}: $message',
+                      orElse: () => 'Idle...',
+                    );
+                    debugPrint('_SearchPageState.build: $result');
+                  },
                   builder: (context, state) {
                     state.log(showTime: true);
                     state.log(onLog: (state) => print('My state: $state'));
@@ -84,10 +99,10 @@ class _SearchPageState extends State<SearchPage> {
                       searchInitial: () => const Center(
                         child: Text('Enter a search term'),
                       ),
-                      searching: (query, filters) => const Center(
+                      searching: (query) => const Center(
                         child: CircularProgressIndicator(),
                       ),
-                      searchResults: (query, results, filters) => ListView.builder(
+                      searchResults: (query, results) => ListView.builder(
                         itemCount: results.length,
                         itemBuilder: (context, index) {
                           return ListTile(
@@ -95,10 +110,10 @@ class _SearchPageState extends State<SearchPage> {
                           );
                         },
                       ),
-                      noResults: (query, filters) => Center(
+                      noResults: (query) => Center(
                         child: Text('No results found for "$query"'),
                       ),
-                      searchError: (message, query, filters) => Center(
+                      searchError: (message, query) => Center(
                         child: Text('Error: $message'),
                       ),
                     );

@@ -1,3 +1,3 @@
 library bloc_state_gen;
 
-export 'src/annotations.dart';
+export 'src/annotations.dart' show BlocStateGen;
