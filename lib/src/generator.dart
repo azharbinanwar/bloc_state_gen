@@ -195,9 +195,51 @@ class StateExtensionGenerator extends GeneratorForAnnotation<BlocStateGen> {
   }
 
   /// Converts a class name to a parameter name in camelCase.
+  ///
+  /// This method cleans the class name by removing common suffixes like
+  /// 'State', 'Bloc', and 'Cubit', and generates a camelCase parameter name.
+  /// It also standardizes names for common state types (e.g., 'Loading' becomes 'onLoading').
+  ///
+  /// Example:
+  /// - 'LoadingState' -> 'onLoading'
+  /// - 'AuthenticatedUserState' -> 'onAuthenticated'
+  /// - 'SuccessBloc' -> 'onSuccess'
+  /// - 'CustomError' -> 'onCustomError'
+  ///
+  /// If a custom state type is detected (e.g., 'AuthenticatedUserState'),
+  /// the function removes the parent class name prefix and converts it to camelCase.
   String _getParameterName(String className) {
     if (className.isEmpty) return '';
-    return className[0].toLowerCase() + className.substring(1);
+
+    /// Remove common prefixes from state names
+    final cleanName = className
+        .replaceAll(RegExp(r'State$'), '') // Remove 'State' suffix if present
+        .replaceAll(RegExp(r'Bloc$'), '') // Remove 'Bloc' suffix if present
+        .replaceAll(RegExp(r'Cubit$'), ''); // Remove 'Cubit' suffix if present
+
+    /// Handle common state types with standardized names
+    if (cleanName.endsWith('Initial')) return 'onInitial';
+    if (cleanName.endsWith('Loading')) return 'onLoading';
+    if (cleanName.endsWith('Success')) return 'onSuccess';
+    if (cleanName.endsWith('Failure')) return 'onFailure';
+    if (cleanName.endsWith('Error')) return 'onError';
+    if (cleanName.endsWith('Empty')) return 'onEmpty';
+    if (cleanName.endsWith('NoResults')) return 'onEmpty';
+
+    /// For custom states, remove the parent class name prefix if present
+    final parentClassRegex = RegExp(
+        r'^(\w+?)(Loading|Success|Error|State|Initial|Empty|NoResults|Failure)$');
+    final match = parentClassRegex.firstMatch(cleanName);
+    if (match != null) {
+      final baseState = match.group(1);
+      if (baseState != null) {
+        /// Convert to camelCase and add 'on' prefix
+        return 'on${baseState[0].toUpperCase()}${baseState.substring(1)}';
+      }
+    }
+
+    /// Default case: just prefix with 'on' and ensure proper casing
+    return 'on${cleanName[0].toUpperCase()}${cleanName.substring(1)}';
   }
 
   /// Generates methods based on annotation configurations.

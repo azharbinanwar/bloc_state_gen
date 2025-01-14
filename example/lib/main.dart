@@ -84,9 +84,9 @@ class _SearchPageState extends State<SearchPage> {
                 child: BlocConsumer<SearchCubit, SearchState>(
                   listener: (context, state) {
                     String result = state.matchSome(
-                      searchResults: (query, results) =>
+                      onSearchResults: (query, results) =>
                           'Found ${results.length} results for: $query',
-                      searchError: (message, query) =>
+                      onError: (message, query) =>
                           'Error${query != null ? " for $query" : ""}: $message',
                       orElse: () => 'Idle...',
                     );
@@ -96,13 +96,13 @@ class _SearchPageState extends State<SearchPage> {
                     state.log(showTime: true);
                     state.log(onLog: (state) => print('My state: $state'));
                     return state.match(
-                      searchInitial: () => const Center(
+                      onInitial: () => const Center(
                         child: Text('Enter a search term'),
                       ),
-                      searching: (query) => const Center(
+                      onSearching: (query) => const Center(
                         child: CircularProgressIndicator(),
                       ),
-                      searchResults: (query, results) => ListView.builder(
+                      onSearchResults: (query, results) => ListView.builder(
                         itemCount: results.length,
                         itemBuilder: (context, index) {
                           return ListTile(
@@ -110,10 +110,10 @@ class _SearchPageState extends State<SearchPage> {
                           );
                         },
                       ),
-                      noResults: (query) => Center(
+                      onEmpty: (query) => Center(
                         child: Text('No results found for "$query"'),
                       ),
-                      searchError: (message, query) => Center(
+                      onError: (message, query) => Center(
                         child: Text('Error: $message'),
                       ),
                     );
