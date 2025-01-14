@@ -1,4 +1,4 @@
-#### 0.1.0
+#### 0.1.0+2
 - **Update** `_getParameterName` function:
     - Converts a class name to a parameter name in camelCase.
     - Cleans class names by removing common suffixes like `State`, `Bloc`, and `Cubit`.
