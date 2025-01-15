@@ -1,7 +1,6 @@
 part of 'my_search_bloc.dart';
 
 @immutable
-@BlocStateGen()
 abstract class MySearchState {
   const MySearchState();
 }

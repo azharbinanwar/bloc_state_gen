@@ -1,12 +1,6 @@
 # bloc_state_gen
 
-
-
-https://github.com/user-attachments/assets/97d02d6d-98af-415f-8538-ef432f4c2ed1
-
-
-
-A lightweight Dart package that generates convenient extensions for BLoC state classes, offering pattern matching and logging capabilities through simple annotations.
+A powerful Dart package that generates convenient extensions for BLoC/Cubit state classes, offering pattern matching and logging capabilities through simple annotations. Now supports both traditional and inline state class definitions!
 
 ## Features
 
@@ -18,6 +12,11 @@ A lightweight Dart package that generates convenient extensions for BLoC state c
 ### 📝 Logging
 - Built-in state logging functionality
 - Debug-friendly state information
+
+### 🎨 Flexible State Definition
+- Support for both traditional and inline state class definitions
+- Automatic state class detection from Bloc/Cubit generic types
+- Works with both Bloc and Cubit patterns
 
 ## Installation
 
@@ -31,15 +30,16 @@ A lightweight Dart package that generates convenient extensions for BLoC state c
      build_runner: ^latest_version
    ```
 
-2. Update your main cubit class to include the generated file:
+2. Update your main cubit class to include the generated file and add annotation `@BlocStateGen()`
 
    ```dart
    import 'package:flutter_bloc/flutter_bloc.dart';
    import 'package:bloc_state_gen/bloc_state_gen.dart';
 
    part 'search_state.dart';
-   part 'search_state.g.dart';
+   part 'search_cubit.s.dart';
 
+   @BlocStateGen()
    class SearchCubit extends Cubit<SearchState> {
      SearchCubit() : super(const SearchInitial());
    }
@@ -51,67 +51,14 @@ A lightweight Dart package that generates convenient extensions for BLoC state c
    flutter pub run build_runner build
    ```
 
-4. Ignore generated `.g.dart` files in version control by adding the following to your `.gitignore`:
+4. Ignore generated `.s.dart` files in version control by adding the following to your `.gitignore`:
 
    ```gitignore
    # Ignore generated files
-   *.g.dart
+   *.s.dart
    ```
 
 ## Usage
-
-### Basic Setup
-
-1. Annotate your state class with `@BlocStateGen`:
-
-   ```dart
-   part of 'search_cubit.dart';
-
-   @BlocStateGen()
-   abstract class SearchState {
-     const SearchState();
-   }
-
-   class SearchInitial extends SearchState {
-     const SearchInitial();
-   }
-
-   class Searching extends SearchState {
-     final String query;
-
-     const Searching({
-       required this.query,
-     });
-   }
-
-   class SearchResults extends SearchState {
-     final String query;
-     final List<String> results;
-
-     const SearchResults({
-       required this.query,
-       required this.results,
-     });
-   }
-
-   class NoResults extends SearchState {
-     final String query;
-
-     const NoResults({
-       required this.query,
-     });
-   }
-
-   class SearchError extends SearchState {
-     final String message;
-     final String? query;
-
-     const SearchError({
-       required this.message,
-       this.query,
-     });
-   }
-   ```
 
 2. Run the code generator:
 
@@ -127,13 +74,13 @@ Requires handling all possible states:
 
 ```dart
 Widget buildStateWidget(SearchState state) {
-  return state.match(
-    searchInitial: () => const StartSearch(),
-    searching: (query) => const CircularProgressIndicator(),
-    searchResults: (query, results) => DisplayList(items: results),
-    noResults: (query) => NoResultsWidget(query: query),
-    searchError: (message, query) => ErrorMessage(message: message),
-  );
+   return state.match(
+      searchInitial: () => const StartSearch(),
+      searching: (query) => const CircularProgressIndicator(),
+      searchResults: (query, results) => DisplayList(items: results),
+      noResults: (query) => NoResultsWidget(query: query),
+      searchError: (message, query) => ErrorMessage(message: message),
+   );
 }
 ```
 
@@ -143,11 +90,11 @@ Handle specific states with a default case:
 
 ```dart
 String getDisplayText(SearchState state) {
-  return state.matchSome(
-    searchResults: (query, results) => 'Found ${results.length} results for: $query',
-    searchError: (message, query) => 'Error${query != null ? " for $query" : ""}: $message',
-    orElse: () => 'Idle...',
-  );
+   return state.matchSome(
+      searchResults: (query, results) => 'Found ${results.length} results for: $query',
+      searchError: (message, query) => 'Error${query != null ? " for $query" : ""}: $message',
+      orElse: () => 'Idle...',
+   );
 }
 ```
 
@@ -157,7 +104,7 @@ Print state information for debugging:
 
 ```dart
 void debugState(CounterState state) {
-  print(state.log());  // Outputs formatted state information
+   print(state.log());  // Outputs formatted state information
 }
 ```
 
@@ -167,13 +114,14 @@ You can selectively enable/disable features using the `@BlocStateGen` annotation
 
 ```dart
 @BlocStateGen(
-  match: true,      // Enable complete pattern matching
-  matchSome: true,  // Enable partial pattern matching
-  log: true,        // Enable logging functionality
+   match: true,      // Enable complete pattern matching
+   matchSome: true,  // Enable partial pattern matching
+   log: true,        // Enable logging functionality
 )
-abstract class SearchState {
-  const SearchState();
+class SearchCubit extends Cubit<SearchState> {
+   SearchCubit() : super(const SearchInitial());
 }
+
 ```
 
 ## Best Practices
@@ -193,7 +141,7 @@ abstract class SearchState {
    - Use in conjunction with Flutter's debug mode:
 ```dart
 if (kDebugMode) {
-  print(state.log());
+print(state.log());
 }
 ```
 

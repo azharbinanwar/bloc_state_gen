@@ -1,6 +1,5 @@
 part of 'search_cubit.dart';
 
-@BlocStateGen()
 abstract class SearchState {
   const SearchState();
 }

@@ -3,14 +3,11 @@ targets:
     builders:
       bloc_state_gen:
         enabled: true
-        generate_for:
-          - lib/**/*_cubit.dart
-          - lib/**/*_bloc.dart
 
 builders:
   bloc_state_gen:
-    import: "package:bloc_state_gen/builder.dart"
+    import: "package:bloc_state_gen/bloc_state_gen_builder.dart"
     builder_factories: [ "blocStateGenBuilder" ]
-    build_extensions: { "_cubit.dart": [ "_state.g.dart" ], "_bloc.dart": [ "_state.g.dart" ] }
+    build_extensions: { ".dart": [ ".s.dart" ] }
     auto_apply: dependents
     build_to: source

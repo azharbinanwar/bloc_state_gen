@@ -2,8 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_state_gen/bloc_state_gen.dart';
 
 part 'search_state.dart';
-part 'search_state.g.dart';
+part 'search_cubit.s.dart';
 
+@BlocStateGen()
 class SearchCubit extends Cubit<SearchState> {
   SearchCubit() : super(const SearchInitial());
 

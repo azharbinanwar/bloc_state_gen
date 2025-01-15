@@ -1,6 +1,6 @@
 name: bloc_state_gen
 description: "A package to generate helper extensions for Bloc, Cubit, and custom state management. It provides a configurable class, `BlocStateGen`, with options to generate the `match` and `matchSome` methods, along with a `log` method, based on the specified flags."
-version: 0.1.1+3
+version: 1.0.0
 homepage: https://github.com/azharbinanwar/bloc_state_gen
 
 environment:

@@ -7,9 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 part 'my_search_event.dart';
 
 part 'my_search_state.dart';
+part 'my_search_bloc.s.dart';
 
-part 'my_search_state.g.dart';
-
+@BlocStateGen()
 class MySearchBloc extends Bloc<MySearchEvent, MySearchState> {
   MySearchBloc() : super(const MySearchInitial()) {
     on<SearchStarted>(_searchStarted);

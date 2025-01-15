@@ -1,3 +1,14 @@
+### 1.0.0
+- feat!: move annotation target from state to bloc/cubit class
+- feat: support state classes defined inside bloc/cubit, HydratedCubit/Bloc, ReplayCubit/Bloc classes
+- fix: update deprecated analyzer API usage (enclosingElement3)
+- fix: improve nested class detection
+- fix: enhance error handling for missing state classes
+- docs: update README with new inline state definition examples
+- docs: add migration guide for 1.0.0
+- chore: update minimum Dart SDK version to 2.17.0
+- chore: upgrade analyzer dependency
+
 #### 0.1.1+3
 - **Documentation Updates**:
   - Fixed dead example link in the `README.md`.
