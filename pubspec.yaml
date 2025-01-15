@@ -1,6 +1,6 @@
 name: bloc_state_gen
-description: "A package to generate helper extensions for Bloc, Cubit, and custom state management. It provides a configurable class, `BlocStateGen`, with options to generate the `match` and `matchSome` methods, along with a `log` method, based on the specified flags."
-version: 1.0.0
+description: "Generate helper extensions for Bloc and Cubit states with type-safe pattern matching and logging."
+version: 1.1.0
 homepage: https://github.com/azharbinanwar/bloc_state_gen
 
 environment:
@@ -8,10 +8,10 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  analyzer: ^6.0.0
-  build: ^2.4.0
-  source_gen: ^1.4.0
-  meta: ^1.15.0
+  analyzer: ^6.11.0
+  build: ^2.4.2
+  source_gen: ^2.0.0
+  meta: 1.15.0
   flutter:
     sdk: flutter
 
